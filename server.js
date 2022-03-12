@@ -59,4 +59,4 @@ function validateToken(req, res, next) {
     }
   })
 }
-app.listen(3030, () => console.log('Server is running on port 3030'));
+app.listen(8090, () => console.log('Server is running on port 8090'));
