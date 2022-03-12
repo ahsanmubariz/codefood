@@ -4,6 +4,7 @@ const cors = require('cors');
 const auth = require('./router.js');
 const recipe = require('./recipeRouter.js');
 const history = require('./history.js');
+const search = require('./search.js');
 const recipelist = require('./createRecipeRouter.js');
 
 const jwt = require('jsonwebtoken');
@@ -23,9 +24,10 @@ app.use(cors());
 app.set('secretKey', 'R4h4s1aN3g4r@')
 
 app.use('/auth', auth);
-app.use('/recipe-categories', validateToken, recipe);
-app.use('/recipes', validateToken, recipelist);
+app.use('/recipe-categories', recipe);
+app.use('/recipes', recipelist);
 app.use('/serve-histories', validateToken, history);
+app.use('/search/recipes', search);
 
 // Handling Errors
 app.use((err, req, res, next) => {
