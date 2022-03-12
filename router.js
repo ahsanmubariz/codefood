@@ -100,21 +100,4 @@ router.post('/login', loginValidation, (req, res, next) => {
         }
     );
 });
-router.post('/get-user', signupValidation, (req, res, next) => {
-    if (
-        !req.headers.authorization ||
-        !req.headers.authorization.startsWith('Bearer') ||
-        !req.headers.authorization.split(' ')[1]
-    ) {
-        return res.status(422).json({
-            message: "Please provide the token",
-        });
-    }
-    const theToken = req.headers.authorization.split(' ')[1];
-    const decoded = jwt.verify(theToken, req.app.get('secretKey'));
-    db.query('SELECT * FROM users where id=?', decoded.id, function (error, results, fields) {
-        if (error) throw error;
-        return res.send({ error: false, data: results[0], message: 'Fetch Successfully.' });
-    });
-});
 module.exports = router;
