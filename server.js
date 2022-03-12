@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const indexRouter = require('./router.js');
+const auth = require('./router.js');
 const recipe = require('./recipeRouter.js');
 const history = require('./history.js');
 const recipelist = require('./createRecipeRouter.js');
@@ -22,7 +22,7 @@ app.use(cors());
 
 app.set('secretKey', 'R4h4s1aN3g4r@')
 
-app.use('/api', indexRouter);
+app.use('/auth', auth);
 app.use('/recipe-categories', validateToken, recipe);
 app.use('/recipes', validateToken, recipelist);
 app.use('/serve-histories', validateToken, history);
