@@ -162,55 +162,52 @@ router.post('/', (req, res, next) => {
 
 });
 router.get('/', async (req, res, next) => {
-    try {
-        let filters = " WHERE 1 ";
-        if (typeof req.query.q !== "undefined" && req.query.q !== null) filters += "AND name like `%" + req.query.q + "%` ";
-        if (typeof req.query.categoryId !== "undefined" && req.query.categoryId !== null) filters += "AND recipeCategoryId = " + req.query.categoryId + " ";
-        if (typeof req.query.sort !== "undefined" && req.query.sort !== null) {
-            switch (req.query.sort) {
-                case "name_asc":
-                    filters += " ORDER BY name asc";
-                    break;
-                case "name_desc":
-                    filters += " ORDER BY name desc";
-                    break;
-                case "like_desc":
-                    filters += " ORDER BY nReactionLike desc";
-                    break;
-                default:
-                    break;
-            }
-        }
-        let limit = 10;
 
-        if (typeof req.query.limit !== "undefined" && req.query.limit !== null) {
-            limit = req.query.limit;
+    let filters = " WHERE 1 ";
+    if (typeof req.query.q !== "undefined" && req.query.q !== null) filters += "AND name like '%" + req.query.q + "%' ";
+    if (typeof req.query.categoryId !== "undefined" && req.query.categoryId !== null) filters += "AND recipeCategoryId = '" + req.query.categoryId + "' ";
+    if (typeof req.query.sort !== "undefined" && req.query.sort !== null) {
+        switch (req.query.sort) {
+            case "name_asc":
+                filters += " ORDER BY name asc";
+                break;
+            case "name_desc":
+                filters += " ORDER BY name desc";
+                break;
+            case "like_desc":
+                filters += " ORDER BY nReactionLike desc";
+                break;
+            default:
+                break;
         }
-        let skip = 0;
+    }
+    let limit = 10;
 
-        if (typeof req.query.skip !== "undefined" && req.query.skip !== null) {
-            skip = req.query.skip
-        }
-        filters += " LIMIT " + limit + " OFFSET " + skip + "";
-        let result = await db.query('SELECT * FROM recipes ' + filters);
-        result = await JSON.parse(JSON.stringify(result));
-        for await (let [index, data] of result.entries()) {
-            let res = await db.query('SELECT * FROM categories WHERE ID =' + data.recipeCategoryId + '');
-            result[index]["recipeCategory"] = res[0];
-        }
+    if (typeof req.query.limit !== "undefined" && req.query.limit !== null) {
+        limit = req.query.limit;
+    }
+    let skip = 0;
 
-        await res.status(200).json({
-            success: true,
-            message: 'success',
-            data: {
-                total: result.length,
-                recipes: result
-            }
-        });
-    } finally {
-        if (db && db.end) db.end()
+    if (typeof req.query.skip !== "undefined" && req.query.skip !== null) {
+        skip = req.query.skip
+    }
+    filters += " LIMIT " + limit + " OFFSET " + skip + "";
+    console.log(filters)
+    let result = await db.query(`SELECT * FROM recipes ` + filters+`;`);
+    result = await JSON.parse(JSON.stringify(result));
+    for await (let [index, data] of result.entries()) {
+        let res = await db.query('SELECT * FROM categories WHERE ID =' + data.recipeCategoryId + '');
+        result[index]["recipeCategory"] = res[0];
     }
 
+    await res.status(200).json({
+        success: true,
+        message: 'success',
+        data: {
+            total: result.length,
+            recipes: result
+        }
+    });
 })
 router.get('/:id', async (req, res, next) => {
     let nServing = 1;
@@ -225,10 +222,13 @@ router.get('/:id', async (req, res, next) => {
     }
     let result = await db.query('SELECT * FROM recipes WHERE id= ' + req.params.id + ' AND nServing = ' + nServing + ';');
     result = await JSON.parse(JSON.stringify(result));
+    if(!result.length) return res.status(500).send({
+        message:"failed"
+    })
     result = result[0];
 
 
-    let category = await db.query('SELECT * FROM categories WHERE ID =' + result.recipeCategoryId + '');
+    let category = await db.query(`SELECT * FROM categories WHERE ID ='` + result.recipeCategoryId + `'`);
     result["recipeCategory"] = category[0];
 
     let ingredients = await db.query('SELECT * FROM ingredientsPerServing WHERE recipesId =' + result.id + '');

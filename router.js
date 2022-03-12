@@ -74,7 +74,6 @@ router.post('/login', loginValidation, (req, res, next) => {
                 (bErr, bResult) => {
                     // wrong password
                     if (bErr) {
-                        throw bErr;
                         return res.status(401).send({
                             msg: 'username or password is incorrect!'
                         });
